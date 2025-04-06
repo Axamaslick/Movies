@@ -19,7 +19,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fabAddMovie: FloatingActionButton
     private lateinit var btnDeleteSelected: Button
 
-
+    private val viewModel: MovieViewModel by viewModels {
+        MovieViewModelFactory(MovieDatabase.getDatabase(this).movieDao())
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,12 +37,21 @@ class MainActivity : AppCompatActivity() {
         fabAddMovie = findViewById(R.id.fabAddMovie)
         btnDeleteSelected = findViewById(R.id.btnDeleteSelected)
 
-
+        adapter = MovieAdapter { movie -> viewModel.deleteMovie(movie) }
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
 
         fabAddMovie.setOnClickListener {
             startActivity(Intent(this, AddActivity::class.java))
         }
 
+        btnDeleteSelected.setOnClickListener {
+            viewModel.deleteSelectedMovies(adapter.getSelectedMovies())
+        }
+
+        viewModel.allMovies.observe(this, Observer { movies ->
+            adapter.submitList(movies)
+        })
 
     }
 }
