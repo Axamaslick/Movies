@@ -1,51 +1,61 @@
 package com.example.movies
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import android.widget.TextView
-import android.widget.ImageView
 
-class SearchAdapter(
-    private val context: Context,
-    private var movies: List<MovieItem>,
-    private val onItemClick: (MovieItem) -> Unit // Лямбда для обработки кликов
-) : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
+class MovieAdapter(
+    private val onDeleteClick: (Movie) -> Unit
+) : RecyclerView.Adapter<MovieAdapter.MovieViewHolder>() {
 
-    fun updateMovies(newMovies: List<MovieItem>) {
+    private var movies: List<Movie> = emptyList()
+
+    fun submitList(newMovies: List<Movie>) {
         movies = newMovies
         notifyDataSetChanged()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(context).inflate(R.layout.search_item, parent, false)
-        return ViewHolder(view)
+    fun getSelectedMovies(): List<Movie> = movies.filter { it.isSelected }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.movie_item, parent, false)
+        return MovieViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(movies[position])
-        holder.itemView.setOnClickListener { onItemClick(movies[position]) }
+    override fun onBindViewHolder(holder: MovieViewHolder, position: Int) {
+        val movie = movies[position]
+        holder.bind(movie) { isChecked ->
+            movie.isSelected = isChecked // Update selection state in the entity
+            notifyItemChanged(position)
+        }
     }
 
     override fun getItemCount(): Int = movies.size
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val title: TextView = itemView.findViewById(R.id.tvTitle)
-        private val year: TextView = itemView.findViewById(R.id.tvYear)
-        private val poster: ImageView = itemView.findViewById(R.id.ivPoster)
+    class MovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val titleTextView: TextView = itemView.findViewById(R.id.titleTextView)
+        private val yearTextView: TextView = itemView.findViewById(R.id.yearTextView)
+        private val posterImageView: ImageView = itemView.findViewById(R.id.posterImageView)
+        private val checkBox: CheckBox = itemView.findViewById(R.id.checkBox)
 
-        fun bind(movie: MovieItem) {
-            title.text = movie.Title
-            year.text = movie.Year
-            Glide.with(context)
-                .load(movie.Poster)
+        fun bind(movie: Movie, onCheckedChange: (Boolean) -> Unit) {
+            titleTextView.text = movie.title
+            yearTextView.text = movie.year
+
+            Glide.with(itemView.context)
+                .load(movie.posterUrl)
                 .placeholder(R.drawable.placeholder)
-                .into(poster)
-            itemView.setOnClickListener {
-                onItemClick(movie) // Вызов лямбды при клике
+                .into(posterImageView)
+
+            checkBox.isChecked = movie.isSelected
+
+            checkBox.setOnCheckedChangeListener { _, isChecked ->
+                onCheckedChange(isChecked)
             }
         }
     }
