@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.example.movies"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.movies"
-        minSdk = 25
-        targetSdk = 34
+        minSdk = 30
+        targetSdk = 30
         versionCode = 1
         versionName = "1.0"
 
