@@ -18,6 +18,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var fabAddMovie: FloatingActionButton
     private lateinit var btnDeleteSelected: Button
+    private lateinit var adapter: MovieAdapter
 
     private val viewModel: MovieViewModel by viewModels {
         MovieViewModelFactory(MovieDatabase.getDatabase(this).movieDao())
